@@ -130,7 +130,9 @@ class Minio(object):
                  secret_key=None, secure=True,
                  region=None,
                  timeout=None,
-                 certificate_bundle=certifi.where()):
+                 certificate_bundle=certifi.where(),
+                 proxy_url=None,
+                 proxy_headers=None):
 
         # Validate endpoint.
         is_valid_endpoint(endpoint)
@@ -159,16 +161,30 @@ class Minio(object):
         self._conn_timeout = urllib3.Timeout.DEFAULT_TIMEOUT if not timeout \
                              else urllib3.Timeout(timeout)
 
-        self._http = urllib3.PoolManager(
-            timeout=self._conn_timeout,
-            cert_reqs='CERT_REQUIRED',
-            ca_certs=certificate_bundle,
-            retries=urllib3.Retry(
-                total=5,
-                backoff_factor=0.2,
-                status_forcelist=[500, 502, 503, 504]
+        if proxy_url != None:
+            self._http = urllib3.ProxyManager(
+                timeout=self._conn_timeout,
+                cert_reqs='CERT_REQUIRED',
+                ca_certs=certificate_bundle,
+                retries=urllib3.Retry(
+                    total=5,
+                    backoff_factor=0.2,
+                    status_forcelist=[500, 502, 503, 504]
+                ),
+                proxy_url=proxy_url,
+                proxy_headers=proxy_headers
             )
-        )
+        else:
+            self._http = urllib3.PoolManager(
+                timeout=self._conn_timeout,
+                cert_reqs='CERT_REQUIRED',
+                ca_certs=certificate_bundle,
+                retries=urllib3.Retry(
+                    total=5,
+                    backoff_factor=0.2,
+                    status_forcelist=[500, 502, 503, 504]
+                )
+            )
 
     # Set application information.
     def set_app_info(self, app_name, app_version):
