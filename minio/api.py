@@ -131,7 +131,7 @@ class Minio(object):
                  region=None,
                  timeout=None,
                  certificate_bundle=certifi.where(),
-                 proxy_url=None,
+                 proxy_url='',
                  proxy_headers=None):
 
         # Validate endpoint.
@@ -161,7 +161,7 @@ class Minio(object):
         self._conn_timeout = urllib3.Timeout.DEFAULT_TIMEOUT if not timeout \
                              else urllib3.Timeout(timeout)
 
-        if proxy_url != None:
+        if proxy_url != '':
             self._http = urllib3.ProxyManager(
                 timeout=self._conn_timeout,
                 cert_reqs='CERT_REQUIRED',
